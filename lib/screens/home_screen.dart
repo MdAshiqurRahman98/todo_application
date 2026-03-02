@@ -14,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<TodoListModel> postList = [];
+  List<TodoListModel> todoList = [];
   bool _inProgress = false;
 
   Future<void> fetchPost() async {
@@ -28,10 +28,15 @@ class _HomeScreenState extends State<HomeScreen> {
       final List<dynamic> postListModel = response.responseData;
 
       setState(() {
-        postList = postListModel.map((e) => TodoListModel.fromJson(e)).toList();
+        todoList = postListModel.map((e) => TodoListModel.fromJson(e)).toList();
       });
     } else {
-      print('Failed to fetch posts: ${response.statusCode}');
+      // print('Failed to fetch posts: ${response.statusCode}');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(response.errorMessage)));
+      }
     }
     setState(() => _inProgress = false);
   }
@@ -86,85 +91,102 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         child: const Icon(Icons.add),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: fetchPost,
-              child: _inProgress
-                  ? Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(8),
-                      itemCount: postList.length,
-                      itemBuilder: (context, index) {
-                        final item = postList[index];
+      body: todoList.isEmpty
+          ? Center(child: Text('No task available...!'))
+          : Column(
+              children: [
+                Expanded(
+                  child: RefreshIndicator(
+                    onRefresh: fetchPost,
+                    child: _inProgress
+                        ? Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(8),
+                            itemCount: todoList.length,
+                            itemBuilder: (context, index) {
+                              final item = todoList[index];
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white12,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ListTile(
-                            title: Text(
-                              item.title ?? '',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.description ?? '',
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.justify,
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white12,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.push(context, MaterialPageRoute(builder: (context)=> ViewTaskScreen(id: postList[index].sId.toString(),)));
-                                      },
-                                      child: Icon(Icons.remove_red_eye),
+                                child: ListTile(
+                                  title: Text(
+                                    item.title ?? '',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    TextButton(
-                                      onPressed: () async {
-                                        final result = await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => TaskForm(
-                                              todoListModel: item,
-                                            ),
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.description ?? '',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.justify,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ViewTaskScreen(
+                                                        id: todoList[index].sId
+                                                            .toString(),
+                                                      ),
+                                                ),
+                                              );
+                                            },
+                                            child: Icon(Icons.remove_red_eye),
                                           ),
-                                        );
-                                        if (result == true) {
-                                          await fetchPost();
-                                        }
-                                      },
-                                      child: Icon(Icons.edit),
-                                    ),
-                                    TextButton(
-                                      onPressed: () async {
-                                        await deleteTodo(
-                                          id: item.sId.toString(),
-                                        );
-                                        await fetchPost();
-                                      },
-                                      child: Icon(Icons.delete),
-                                    ),
-                                  ],
+                                          TextButton(
+                                            onPressed: () async {
+                                              final result =
+                                                  await Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          TaskForm(
+                                                            todoListModel: item,
+                                                          ),
+                                                    ),
+                                                  );
+                                              if (result == true) {
+                                                await fetchPost();
+                                              }
+                                            },
+                                            child: Icon(Icons.edit),
+                                          ),
+                                          TextButton(
+                                            onPressed: () async {
+                                              await deleteTodo(
+                                                id: item.sId.toString(),
+                                              );
+                                              await fetchPost();
+                                            },
+                                            child: Icon(Icons.delete),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
