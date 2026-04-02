@@ -53,7 +53,7 @@ The app interacts with a REST API backend to persist and manage task data.
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/MdAshiqurRahman98/todo-application.git
+git clone https://github.com/MdAshiqurRahman98/todo_application.git
 ```
 
 2. **Navigate to the project directory**
@@ -94,3 +94,27 @@ lib/
  ├── services/       # NetworkResponse & Network Callers
  └── urls.dart       # API endpoint definitions
 ```
+<!-- 
+---
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/YourFeature`)
+3. Commit your changes (`git commit -m 'Add some feature'`)
+4. Push to the branch (`git push origin feature/YourFeature`)
+5. Open a Pull Request
+
+---
+
+## License
+
+This project is licensed under the **MIT License**.
+© 2026 Md Ashiqur Rahman
+
+**Connect with me for DM**
+```bash
+www.linkedin.com/in/mdashiqurrahman98
+``` -->
